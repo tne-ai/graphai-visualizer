@@ -30,16 +30,13 @@ export = defineExtension(async () => {
         const editor = window.activeTextEditor;
         if (editor && editor.document === document) {
           const text = document.getText();
-          const fileNameOnly =
-            fileName.split("/").pop() || fileName.split("\\").pop() || "";
-
+          const fileNameOnly = fileName.split("/").pop() || fileName.split("\\").pop() || "";
+          
           const { panel, updateGraph } = useMermaidWebview(fileNameOnly);
           panel.reveal();
           updateGraph(text, "yaml");
-
-          logger.info(
-            `Auto-launched GraphAI visualization for ${fileNameOnly}`,
-          );
+          
+          logger.info(`Auto-launched GraphAI visualization for ${fileNameOnly}`);
         }
       }, 100);
     }
