@@ -16,9 +16,34 @@ import { logger } from "./utils";
 export = defineExtension(async () => {
   logger.info("Extension Activated");
   const onDidSaveTextDocument = useEvent(workspace.onDidSaveTextDocument);
+  const onDidOpenTextDocument = useEvent(workspace.onDidOpenTextDocument);
 
   // 起動時にagentIndexを取得
   const agentIndex = await fetchAgentIndex();
+
+  // Auto-launch for *.ai.yaml files
+  onDidOpenTextDocument((document) => {
+    const fileName = document.fileName;
+    if (fileName.endsWith(".ai.yaml") && document.languageId === "yaml") {
+      // Small delay to ensure the editor is ready
+      setTimeout(() => {
+        const editor = window.activeTextEditor;
+        if (editor && editor.document === document) {
+          const text = document.getText();
+          const fileNameOnly =
+            fileName.split("/").pop() || fileName.split("\\").pop() || "";
+
+          const { panel, updateGraph } = useMermaidWebview(fileNameOnly);
+          panel.reveal();
+          updateGraph(text, "yaml");
+
+          logger.info(
+            `Auto-launched GraphAI visualization for ${fileNameOnly}`,
+          );
+        }
+      }, 100);
+    }
+  });
 
   /**
    * Show graph from JSON, YAML file or TypeScript selection

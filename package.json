@@ -4,7 +4,7 @@
   "displayName": "GraphAI Visualizer",
   "icon": "resources/icon.png",
   "type": "module",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/kawamataryo/graphai-visualizer"
@@ -22,7 +22,8 @@
     "onCommand:graphai-visualizer.showGraph",
     "onLanguage:yaml",
     "onLanguage:json",
-    "onLanguage:typescript"
+    "onLanguage:typescript",
+    "workspaceContains:**/*.ai.yaml"
   ],
   "contributes": {
     "commands": [

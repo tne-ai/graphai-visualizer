@@ -1,0 +1,74 @@
+version: 0.3.0
+nodes:
+  # Input nodes
+  userQuestion:
+    agent: textInputAgent
+    params:
+      message: "What's your question?"
+      
+  systemContext:
+    value: "You are an expert assistant."
+    
+  temperature:
+    value: 0.7
+    
+  # Template processing
+  promptBuilder:
+    agent: stringTemplateAgent
+    params:
+      template: "Context: ${context}\nQuestion: ${question}\nTemperature: ${temp}"
+    inputs:
+      context: ":systemContext"
+      question: ":userQuestion"
+      temp: ":temperature"
+      
+  # AI processing
+  aiResponse:
+    agent: openAIAgent
+    params:
+      model: "gpt-4"
+      temperature: 0.7
+    inputs:
+      prompt: ":promptBuilder"
+      
+  # Nested processing
+  nestedProcessor:
+    agent: nestedAgent
+    params:
+      graph:
+        nodes:
+          subProcess:
+            agent: copyAgent
+            inputs:
+              data: ":aiResponse"
+    inputs:
+      aiResponse: ":aiResponse"
+      
+  # Filtering and extraction
+  contentExtractor:
+    agent: propertyFilterAgent
+    params:
+      property: "choices[0].message.content"
+    inputs:
+      response: ":nestedProcessor"
+      
+  # Final processing
+  finalCopy:
+    agent: copyAgent
+    inputs:
+      content: ":contentExtractor"
+      
+  # Additional nodes for complex graph
+  validator:
+    agent: compareAgent
+    params:
+      operator: "isNotEmpty"
+    inputs:
+      value: ":finalCopy"
+      
+  output:
+    agent: pushAgent
+    inputs:
+      array: []
+      item: ":finalCopy"
+    update: ":validator" 
